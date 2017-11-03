@@ -1,6 +1,6 @@
 # knowledge-representation
 
-This is a GitHub project for the lecture "Wissensrepräsentation" at HTW Berlin in WiSe 2017/2018
+This is a project for the lecture "Wissensrepräsentation"
 
 ## Assignments
 
