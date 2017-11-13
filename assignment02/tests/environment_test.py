@@ -1,4 +1,6 @@
 import unittest
+from ..src import environment
+import numpy as np
 
 
 class TestJacksCarRentalEnvironment(unittest.TestCase):
@@ -6,7 +8,7 @@ class TestJacksCarRentalEnvironment(unittest.TestCase):
     # these numbers depending on the env parameters!
 
     def setUp(self):
-        self.env = JacksCarRentalEnvironment()
+        self.env = environment.JacksCarRentalEnvironment()
 
     def _avg_mean(self, cars, action, t_mean, max_diff=1.):
         env = self.env
@@ -27,8 +29,8 @@ class TestJacksCarRentalEnvironment(unittest.TestCase):
         self._avg_mean(10, 0, 70)
 
     def test_nightly_moves(self):
-        env.reset(0)
-        _, r, _, _ = env.step(5)
+        self.env.reset(0)
+        _, r, _, _ = self.env.step(5)
         self.assertTrue(r == -10.)
 
     def _avg_nb_cars(self, a_desired, b_desired,
