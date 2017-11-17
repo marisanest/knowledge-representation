@@ -1,21 +1,7 @@
 import numpy as np
 import scipy
 import logging
-
-
-class JacksCarRentalEnvironment(object):
-
-    MAX_CAPACITY = 20
-
-    def __init__(self):
-        pass
-
-    def reset(self):
-        pass
-
-    def step(self):
-        observation, reward, done, info = None
-        return observation, reward, done, info
+from assignment02.src.jacks_car_rental.environment import JacksCarRentalEnvironment
 
 
 class JacksCarRentalEnvironmentModel(JacksCarRentalEnvironment):

@@ -1,5 +1,5 @@
 import unittest
-from ..src import environment
+from assignment02.src.jacks_car_rental import environment
 import numpy as np
 
 

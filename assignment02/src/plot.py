@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from ..src import environment as env
+from assignment02.src.jacks_car_rental import environment as env
 # from matplotlib import cm
 
 
