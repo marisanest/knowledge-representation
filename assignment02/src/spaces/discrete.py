@@ -26,10 +26,10 @@ class Discrete(Space):
 
     @property
     def shape(self):
-        return (self.n,)
+        return self.low, self.high
 
     def __repr__(self):
-        return "Discrete(%d)" % self.n
+        return "Discrete(%d, %d)" % (self.low, self.high)
 
     def __eq__(self, other):
-        return self.n == other.n
+        return self.low == other.low and self.high == other.high

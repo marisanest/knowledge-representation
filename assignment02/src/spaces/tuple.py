@@ -19,7 +19,7 @@ class Tuple(Space):
         if isinstance(x, list):
             x = tuple(x)  # Promote list to tuple for contains check
         return isinstance(x, tuple) and len(x) == len(self.spaces) and all(
-            space.contains(part) for (space,part) in zip(self.spaces,x))
+            space.contains(part) for (space, part) in zip(self.spaces, x))
 
     def _get_shape(self):
         return tuple([space.shape for space in self.spaces])

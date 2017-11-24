@@ -66,9 +66,10 @@ class Env(object):
 
     # Override in ALL subclasses
     def _step(self, action): raise NotImplementedError
-    def _reset(self): raise NotImplementedError
+
+    def _reset(self, default=None): raise NotImplementedError
+
     def _render(self, mode='human', close=False): return
-    def _seed(self, seed=None): return []
 
     # Do not override
     _owns_render = True
@@ -91,13 +92,13 @@ class Env(object):
         """
         return self._step(action)
 
-    def reset(self):
+    def reset(self, default=None):
         """Resets the state of the environment and returns an initial observation.
 
         Returns: observation (object): the initial observation of the
             space.
         """
-        return self._reset()
+        return self._reset(default)
 
     def render(self, mode='human', close=False):
         """Renders the environment.
