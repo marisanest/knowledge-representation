@@ -27,8 +27,9 @@ class JacksCarRentalEnvironment(Env):
     MAX_MOVE = 5
     TRANSFER_COST = 2
     CREDIT_PER_CAR_RENTAL = 10
-    LAMBDA = {'a': {'rental': 3, 'return': 3},
-              'b': {'rental': 4, 'return': 2}}
+    REQUEST_RATE = {'a': 3, 'b': 4}
+    RETURN_RATE = {'a': 3, 'b': 2}
+    LOCATIONS = ['a', 'b']
     GAMMA = 0.9
 
     def __init__(self):
@@ -44,32 +45,34 @@ class JacksCarRentalEnvironment(Env):
 
         reward = self._move_cars(action)
 
-        for key in self.locations.keys():
-            reward += self._rent_cars(key)
-            self._return_cars(key)
+        for location in self.LOCATIONS:
+            reward += self._rent_cars(location)
+            self._return_cars(location)
 
         return self._get_obs(), reward, False, ''
 
     def _get_obs(self) -> _Tuple[int, int]:
-        return self.locations['a'], self.locations['b']
+        return tuple([self.locations[location] for location in self.LOCATIONS])
 
     def _reset(self, default=None) -> _Tuple[int, int]:
         if default is not None:
             if self.observation_space.contains([default, default]):
-                self.locations['a'], self.locations['b'] = default, default
+                for location in self.LOCATIONS:
+                    self.locations[location] = default
         else:
-            self.locations['a'], self.locations['b'] = self.observation_space.sample()
+            for index, location in enumerate(self.LOCATIONS):
+                self.locations[location] = self.observation_space.sample()[index]
 
         return self._get_obs()
 
     def _move_cars(self, action: int) -> int:
 
-        _from = 'a'
-        _to = 'b'
+        _from = self.LOCATIONS[0]
+        _to = self.LOCATIONS[1]
 
         if action < 0:
-            _from = 'b'
-            _to = 'a'
+            _from = self.LOCATIONS[1]
+            _to = self.LOCATIONS[0]
 
         action = abs(action)
 
@@ -84,7 +87,7 @@ class JacksCarRentalEnvironment(Env):
 
     def _rent_cars(self, location) -> int:
 
-        rent = round(poisson(self.LAMBDA[location]['rental']))
+        rent = round(poisson(self.REQUEST_RATE[location]))
 
         if self.locations[location] < rent:
             reward = self.locations[location] * self.CREDIT_PER_CAR_RENTAL
@@ -97,7 +100,7 @@ class JacksCarRentalEnvironment(Env):
 
     def _return_cars(self, location):
 
-        _return = round(poisson(self.LAMBDA[location]['return']))
+        _return = round(poisson(self.RETURN_RATE[location]))
 
         if self.locations[location] + _return > self.MAX_CAPACITY:
             self.locations[location] = self.MAX_CAPACITY
