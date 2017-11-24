@@ -26,11 +26,11 @@ class JacksCarRentalEnvironment(Env):
     MAX_CAPACITY = 20
     MAX_MOVE = 5
     TRANSFER_COST = 2
-    CREDIT_PER_CAR_RENTAL = 10
+    RENTAL_INCOME = 10
     REQUEST_RATE = {'a': 3, 'b': 4}
     RETURN_RATE = {'a': 3, 'b': 2}
     LOCATIONS = ['a', 'b']
-    GAMMA = 0.9
+    ACTIONS = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
 
     def __init__(self):
         self.action_space = Discrete(-self.MAX_MOVE, self.MAX_MOVE + 1)
@@ -90,10 +90,10 @@ class JacksCarRentalEnvironment(Env):
         rent = round(poisson(self.REQUEST_RATE[location]))
 
         if self.locations[location] < rent:
-            reward = self.locations[location] * self.CREDIT_PER_CAR_RENTAL
+            reward = self.locations[location] * self.RENTAL_INCOME
             self.locations[location] = 0
         else:
-            reward = rent * self.CREDIT_PER_CAR_RENTAL
+            reward = rent * self.RENTAL_INCOME
             self.locations[location] = self.locations[location] - rent
 
         return reward
