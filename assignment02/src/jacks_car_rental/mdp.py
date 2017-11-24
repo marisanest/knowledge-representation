@@ -90,6 +90,7 @@ class JacksCarRentalEnvironmentMDP(object):
             if delta >= theta:
                 converged = True
 
+    # todo: improvement
     def improve(self):
 
         nstates = self.model.MAX_CAPACITY + 1
@@ -103,3 +104,4 @@ class JacksCarRentalEnvironmentMDP(object):
                     new_action = self.q[s_a, s_b].max
 
 
+    # todo: value iteration
