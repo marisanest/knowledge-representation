@@ -26,11 +26,3 @@ class Tuple(Space):
 
     def __repr__(self):
         return "Tuple(" + ", ". join([str(s) for s in self.spaces]) + ")"
-
-    def to_jsonable(self, sample_n):
-        # serialize as list-repr of tuple of vectors
-        return [space.to_jsonable([sample[i] for sample in sample_n]) \
-                for i, space in enumerate(self.spaces)]
-
-    def from_jsonable(self, sample_n):
-        return [sample for sample in zip(*[space.from_jsonable(sample_n[i]) for i, space in enumerate(self.spaces)])]
