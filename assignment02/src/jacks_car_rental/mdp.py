@@ -9,55 +9,51 @@ class JacksCarRentalEnvironmentMDP(object):
 
     def __init__(self):
         self.model = JacksCarRentalEnvironmentModel()
+
+        self.nb_separate_states = self.model.MAX_CAPACITY + 1
+        self.nb_states = self.nb_separate_states * self.nb_separate_states
+        self.nb_actions = len(self.model.ACTIONS)
+
+        self.index_to_stats = self._init_index_to_stats()
+
         self.policy = self._init_policy()
         self.q = self._init_q()
         self.p, self.r = self._init_p_and_r()
-        self.nb_states = self.model.MAX_CAPACITY + 1
-        self.nb_actions = len(self.model.ACTIONS)
 
-    def _index_to_stats_map(self):
+    def _init_index_to_stats(self):
 
-        index_to_states = np.zeros(self.nb_states * len(self.model.LOCATIONS))
+        index_to_states = {}
 
-        for index_a in range(0, self.nb_states):
-            for index_b in range(0, self.nb_states):
-                index_to_states[index_a * self.nb_states + index_b] = (index_a, index_b)
+        for index_a in range(0, self.nb_separate_states):
+            for index_b in range(0, self.nb_separate_states):
+                index_to_states[index_a * self.nb_separate_states + index_b] = (index_a, index_b)
 
         return index_to_states
 
     def _stats_to_index(self, stat_a, stat_b):
-            return stat_a * self.model.MAX_CAPACITY + stat_b
+            return stat_a * self.nb_separate_states + stat_b
 
     def _init_p_and_r(self):
 
         # s, a, s', r
-        p = np.zeros((self.nb_states, self.nb_states, self.nb_actions, self.nb_states, self.nb_states))
-        expected_rewards = np.zeros((self.nb_states, self.nb_states, self.nb_actions))
+        p = np.zeros((self.nb_states, self.nb_actions, self.nb_states, 1))
+        r = np.zeros((self.nb_states, self.nb_actions))
 
-        for s_a in range(0, self.nb_states):
-            for s_b in range(0, self.nb_states):
-                for a in self.model.ACTIONS:
+        for s in range(0, self.nb_states):
+            for a in range(0, self.nb_actions):
 
-                    transition_probabilities, expected_rewards[s_a, s_b, a] = self.model.get_transition_probabilities_and_expected_reward((s_a, s_b), a)
+                p_a_b, r[s, a] = self.model.get_transition_probabilities_and_expected_reward(self.index_to_stats[s], self.model.ACTIONS[a])
+                for next_s_a, p_a in enumerate(p_a_b[0]):
+                    for next_s_b, p_b in enumerate(p_a_b[1]):
+                        p[s, a, self._stats_to_index(next_s_a, next_s_b), 0] = p_a * p_b
 
-                    for next_s_a, p_a in enumerate(transition_probabilities[0]):
-                        for next_s_b, p_b in enumerate(transition_probabilities[1]):
-                            p[s_a, s_b, a, next_s_a, next_s_b, 0] = p_a * p_b
-
-        return p, expected_rewards
+        return p, r
 
     def _init_policy(self):
-
-        policy = np.zeros((self.nb_states, self.nb_states))
-
-        for s_a in range(0, self.nb_states):
-            for s_b in range(0, self.nb_states):
-                policy[s_a, s_b] = np.random.randint(self.nb_actions)
-
-        return policy
+        return np.random.randint(self.nb_actions, size=self.nb_states)
 
     def _init_q(self):
-        return np.zeros((self.nb_states, self.nb_states, self.nb_actions))
+        return np.zeros((self.nb_states, self.nb_actions))
 
     def evaluate(self, theta=.05, gamma=.9):
 
@@ -67,39 +63,35 @@ class JacksCarRentalEnvironmentMDP(object):
 
             delta = .0
 
-            for s_a in range(0, self.nb_states):
-                for s_b in range(0, self.nb_states):
-                    a = self.policy[s_a, s_b]
+            for s in range(0, self.nb_states):
 
-                    old_q = self.q[s_a, s_b, a]
-                    new_q = 0
+                a = self.policy[s]
+                old_q = self.q[s, a]
+                new_q = 0
 
-                    for next_s_a in range(0, self.nb_states):
-                        for next_s_b in range(0, self.nb_states):
-                                new_q += self.p.sum(axis=5)[s_a, s_b, a, next_s_a, next_s_b] * (self.r[s_a, s_b, a] + gamma * self.q[next_s_a, next_s_b, self.policy[next_s_a, next_s_b]])
+                for next_s in range(0, self.nb_states):
+                    new_q += self.p.sum(axis=3)[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, self.policy[next_s]])
 
-                    self.q[s_a, s_b, a] = new_q
-                    delta = np.amax([delta, abs(old_q - new_q)])
+                self.q[s, a] = new_q
+                delta = np.amax([delta, abs(old_q - new_q)])
 
             if delta >= theta:
                 converged = True
 
     def improve(self):
 
-        for s_a in range(0, self.nb_states):
-            for s_b in range(0, self.nb_states):
+        for s in range(0, self.nb_states):
+            max_a, max_value = None, None
 
-                max_a, max_value = None, None
+            for a in range(0, self.nb_actions):
 
-                for a in range(0, self.nb_actions):
+                value = self.q[s, a]
 
-                    value = self.q[s_a, s_b, a]
+                if max_value is None or max_value < value:
+                    max_value = value
+                    max_a = a
 
-                    if max_value is None or max_value < value:
-                        max_value = value
-                        max_a = a
-
-                self.policy[s_a, s_b] = max_a
+            self.policy[s] = max_a
 
     def iterate_policy(self):
 
@@ -124,25 +116,22 @@ class JacksCarRentalEnvironmentMDP(object):
 
             delta = .0
 
-            for s_a in range(0, self.nb_states):
-                for s_b in range(0, self.nb_states):
+            for s in range(0, self.nb_states):
 
-                    old_max_q = np.amax(self.q[s_a, s_b, :])
-                    old_a = np.argmax(self.q[s_a, s_b, :])
+                old_max_q = np.amax(self.q[s, :])
+                old_a = np.argmax(self.q[s, :])
 
-                    for a in range(0, self.nb_actions):
+                for a in range(0, self.nb_actions):
 
-                        new_q = 0
+                    new_q = 0
 
-                        for next_s_a in range(0, self.nb_states):
-                            for next_s_b in range(0, self.nb_states):
-                                    new_q += self.p.sum(axis=5)[s_a, s_b, a, next_s_a, next_s_b] * (self.r[s_a, s_b, a] + gamma * self.q[next_s_a, next_s_b, old_a])
+                    for next_s in range(0, self.nb_states):
+                        new_q += self.p.sum(axis=3)[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, old_a])
 
-                        self.q[s_a, s_b, a] = new_q
+                    self.q[s, a] = new_q
 
-                    new_max_q = np.amax(self.q[s_a, s_b, :])
-
-                    delta = np.amax([delta, abs(old_max_q - new_max_q)])
+                new_max_q = np.amax(self.q[s, :])
+                delta = np.amax([delta, abs(old_max_q - new_max_q)])
 
             if delta >= theta:
                 converged = True
