@@ -66,7 +66,9 @@ class JacksCarRentalEnvironmentMDP(object):
         for s in range(self.nb_states):
             self.v[s] = np.amax(self.q[s, :])
 
-    def evaluate(self, theta=.05, gamma=.9):
+    def evaluate(self, gamma=.9):
+
+        l = range(self.nb_states)
 
         converged = False
 
@@ -75,43 +77,18 @@ class JacksCarRentalEnvironmentMDP(object):
             logging.info("values not converged.")
             logging.info("start evaluation.")
 
-            delta = .0
+            v = self.q[l, self.policy]
+            new_q = self.r + gamma * np.dot(self.p.sum(axis=3), v)
 
-            for s in range(0, self.nb_states):
-
-                logging.info("evaluation for state: %s" % s)
-
-                a = self.policy[s]
-                old_q = self.q[s, a]
-                new_q = 0
-
-                for next_s in range(0, self.nb_states):
-                    new_q += self.p.sum(axis=3)[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, self.policy[next_s]])
-
-                self.q[s, a] = new_q
-                delta = np.amax([delta, abs(old_q - new_q)])
-
-            if delta < theta:
+            if np.allclose(new_q, self.q):
                 converged = True
 
+            self.q = new_q
+
     def improve(self):
+        self.policy = np.argmax(self.q[:, 1:], axis=1) + 1
 
-        logging.info("start improvement.")
-
-        for s in range(0, self.nb_states):
-            max_a, max_value = None, None
-
-            for a in range(0, self.nb_actions):
-
-                value = self.q[s, a]
-
-                if max_value is None or max_value < value:
-                    max_value = value
-                    max_a = a
-
-            self.policy[s] = max_a
-
-    def iterate_policy(self, theta=.05):
+    def iterate_policy(self):
 
         policy_stable = False
 
@@ -121,50 +98,32 @@ class JacksCarRentalEnvironmentMDP(object):
 
             logging.info("policy not stable.")
 
-            self.evaluate(theta=theta)
+            self.evaluate()
+
+            logging.info("start improvement.")
 
             old_policy = np.copy(self.policy)
 
-            logging.info("start improvement.")
             self.improve()
 
             if (old_policy == self.policy).all():
                 policy_stable = True
 
-    def iterate_values(self, theta=.05, gamma=.9):
+    def iterate_values(self, gamma=.9):
 
         converged = False
-
-        logging.info("start iteration")
 
         while not converged:
 
             logging.info("values not converged.")
             logging.info("start evaluation.")
 
-            delta = .0
+            v_max = np.max(self.q, axis=1)
+            new_q = self.r + gamma * np.dot(self.p.sum(axis=3), v_max)
 
-            for s in range(0, self.nb_states):
-
-                logging.info("evaluation for state: %s" % s)
-
-                old_max_q = np.amax(self.q[s, :])
-                old_a = np.argmax(self.q[s, :])
-
-                for a in range(0, self.nb_actions):
-
-                    new_q = 0
-
-                    for next_s in range(0, self.nb_states):
-                        new_q += self.p.sum(axis=3)[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, old_a])
-
-                    self.q[s, a] = new_q
-
-                new_max_q = np.amax(self.q[s, :])
-                delta = np.amax([delta, abs(old_max_q - new_max_q)])
-
-            if delta < theta:
+            if np.allclose(new_q, self.q):
                 converged = True
+            self.q = new_q
 
         self.improve()
 
