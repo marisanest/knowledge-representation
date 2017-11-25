@@ -21,7 +21,7 @@ class JacksCarRentalEnvironmentMDP(object):
 
         self.policy = self._init_policy()
         self.q = self._init_q()
-        # self.p, self.r = self._init_p_and_r()
+        self.p, self.r = self._init_p_and_r()
         self.v = None
 
     def _init_index_to_stats(self):
