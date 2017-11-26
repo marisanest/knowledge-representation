@@ -82,13 +82,16 @@ class JacksCarRentalEnvironmentMDP(object):
         self.v = None
         self.state_to_action = None
 
-    def evaluate(self, theta=.05, gamma=.9):
+    def evaluate(self, iterations=1, theta=.05, gamma=.9):
 
-        converged = False
+        # converged = False
 
         logging.info("start evaluation.")
 
-        while not converged:
+        p_s_next = self.p.sum(axis=3)
+
+        # while not converged:
+        for _ in range(iterations):
 
             delta = .0
 
@@ -101,12 +104,12 @@ class JacksCarRentalEnvironmentMDP(object):
                     self.q[s, a] = 0
 
                     for next_s in range(self.nb_states):
-                        self.q[s, a] += self.p.sum(axis=3)[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, self.policy[next_s]])
+                        self.q[s, a] += p_s_next[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, self.policy[next_s]])
 
                     delta = np.amax([delta, abs(old_q - self.q[s, a])])
 
-            if delta < theta:
-                converged = True
+            # if delta < theta:
+            #    converged = True
 
     def improve(self):
 
