@@ -19,10 +19,10 @@ class JacksCarRentalEnvironmentMDP(object):
 
         self.index_to_stats = self._init_index_to_stats()
 
-        self.policy = self._init_policy()
-        self.q = self._init_q()
         self.p, self.r = self._init_p_and_r()
 
+        self.policy = self._init_policy()
+        self.q = self._init_q()
         self.v = None
         self.state_to_action = None
 
@@ -74,6 +74,12 @@ class JacksCarRentalEnvironmentMDP(object):
 
         for key, value in enumerate(self.policy):
             self.state_to_action[key] = self.model.ACTIONS[value]
+
+    def reset(self):
+        self.policy = self._init_policy()
+        self.q = self._init_q()
+        self.v = None
+        self.state_to_action = None
 
     def evaluate(self, gamma=.9):
 
