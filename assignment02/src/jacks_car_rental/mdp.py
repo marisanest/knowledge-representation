@@ -20,6 +20,7 @@ class JacksCarRentalEnvironmentMDP(object):
         self.index_to_stats = self._init_index_to_stats()
 
         self.p, self.r = self._init_p_and_r()
+        self.p_s_sum_r = self.p.sum(axis=3)
 
         self.policy = self._init_policy()
         self.q = self._init_q()
@@ -82,54 +83,37 @@ class JacksCarRentalEnvironmentMDP(object):
         self.v = None
         self.state_to_action = None
 
-    def evaluate(self, iterations=1, theta=.05, gamma=.9):
+    def evaluate(self, theta=1, gamma=.9):
 
-        # converged = False
+        converged = False
 
         logging.info("start evaluation.")
 
-        p_s_next = self.p.sum(axis=3)
+        while not converged:
 
-        # while not converged:
-        for _ in range(iterations):
+            logging.info("evaluate...")
 
             delta = .0
 
             for s in range(self.nb_states):
                 for a in range(self.nb_actions):
 
-                    logging.info("evaluation for state and action: %d, %d" % (s, a))
-
                     old_q = self.q[s, a]
-                    self.q[s, a] = 0
 
-                    for next_s in range(self.nb_states):
-                        self.q[s, a] += p_s_next[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, self.policy[next_s]])
+                    self.q[s, a] = sum([self.p_s_sum_r[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, self.policy[next_s]]) for next_s in range(self.nb_states)])
 
                     delta = np.amax([delta, abs(old_q - self.q[s, a])])
 
-            # if delta < theta:
-            #    converged = True
+            if delta < theta:
+                converged = True
 
     def improve(self):
 
         logging.info("start improvement.")
 
-        for s in range(self.nb_states):
+        self.policy = np.argmax(self.q[:, :], axis=1)
 
-            max_a, max_value = None, None
-
-            for a in range(self.nb_actions):
-
-                value = self.q[s, a]
-
-                if max_value is None or max_value < value:
-                    max_value = value
-                    max_a = a
-
-            self.policy[s] = max_a
-
-    def iterate_policy(self, theta=.05):
+    def iterate_policy(self, theta=1):
 
         policy_stable = False
 
@@ -146,30 +130,28 @@ class JacksCarRentalEnvironmentMDP(object):
             if (old_policy == self.policy).all():
                 policy_stable = True
 
-    def iterate_values(self, theta=.05, gamma=.9):
+    def iterate_values(self, theta=1, gamma=.9):
 
         logging.info("start iteration")
 
         converged = False
 
-        p_s_next = self.p.sum(axis=3)
+        logging.info("start evaluation.")
 
         while not converged:
 
-            logging.info("start evaluation.")
+            logging.info("evaluate...")
 
             delta = .0
 
             for s in range(self.nb_states):
                 for a in range(self.nb_actions):
 
-                    logging.info("evaluation for state and action: %d, %d" % (s, a))
-
                     old_q = self.q[s, a]
-                    self.q[s, a] = 0
 
-                    for next_s in range(self.nb_states):
-                        self.q[s, a] += p_s_next[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, np.argmax(self.q[next_s, :])])
+                    self.q[s, a] = sum(
+                        [self.p_s_sum_r[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, np.argmax(self.q[next_s, :])]) for
+                         next_s in range(self.nb_states)])
 
                     delta = np.amax([delta, abs(old_q - self.q[s, a])])
 
