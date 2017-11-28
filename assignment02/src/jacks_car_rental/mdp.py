@@ -20,6 +20,7 @@ class JacksCarRentalEnvironmentMDP(object):
         self.index_to_stats = self._init_index_to_stats()
 
         self.p, self.r = self._init_p_and_r()
+        self.p_s_prime = self.p.sum(axis=3)
 
         self.policy = self._init_policy()
         self.q = self._init_q()
@@ -92,7 +93,7 @@ class JacksCarRentalEnvironmentMDP(object):
         while not converged:
 
             v = self.q[l, self.policy]
-            new_q = self.r + gamma * np.dot(self.p.sum(axis=3), v)
+            new_q = self.r + gamma * np.dot(self.p_s_prime, v)
 
             if np.allclose(new_q, self.q):
                 converged = True
@@ -131,7 +132,7 @@ class JacksCarRentalEnvironmentMDP(object):
         while not converged:
 
             v_max = np.max(self.q, axis=1)
-            new_q = self.r + gamma * np.dot(self.p.sum(axis=3), v_max)
+            new_q = self.r + gamma * np.dot(self.p_s_prime, v_max)
 
             if np.allclose(new_q, self.q):
                 converged = True
