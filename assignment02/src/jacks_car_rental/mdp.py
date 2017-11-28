@@ -20,7 +20,7 @@ class JacksCarRentalEnvironmentMDP(object):
         self.index_to_stats = self._init_index_to_stats()
 
         self.p, self.r = self._init_p_and_r()
-        self.p_s_sum_r = self.p.sum(axis=3)
+        self.p_s_prime = self.p.sum(axis=3)
 
         self.policy = self._init_policy()
         self.q = self._init_q()
@@ -100,7 +100,7 @@ class JacksCarRentalEnvironmentMDP(object):
 
                     old_q = self.q[s, a]
 
-                    self.q[s, a] = sum([self.p_s_sum_r[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, self.policy[next_s]]) for next_s in range(self.nb_states)])
+                    self.q[s, a] = sum([self.p_s_prime[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, self.policy[next_s]]) for next_s in range(self.nb_states)])
 
                     delta = np.amax([delta, abs(old_q - self.q[s, a])])
 
@@ -150,7 +150,7 @@ class JacksCarRentalEnvironmentMDP(object):
                     old_q = self.q[s, a]
 
                     self.q[s, a] = sum(
-                        [self.p_s_sum_r[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, np.argmax(self.q[next_s, :])]) for
+                        [self.p_s_prime[s, a, next_s] * (self.r[s, a] + gamma * self.q[next_s, np.argmax(self.q[next_s, :])]) for
                          next_s in range(self.nb_states)])
 
                     delta = np.amax([delta, abs(old_q - self.q[s, a])])
