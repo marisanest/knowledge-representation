@@ -6,8 +6,8 @@ This is a project for the lecture "Wissensrepräsentation".
 
 See [the lecture](https://moodle.htw-berlin.de/course/view.php?id=14471)
 
-1. Expected Value, Bandit, Action-Value Method and 10-armed Testbed
-2. MDP, Jacks Car Rental
+1. Expected Value, Action-Value, Bandit, 10-armed Testbed
+2. MDP, State-Value-Function, State-Action-Value-Function, Jacks Car Rental
 
 #### Requirements
 
