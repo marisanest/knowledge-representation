@@ -1,6 +1,5 @@
 import numpy as np
 from assignment03.src.control import VController, QController
-from assignment03.src.perfomance import PerformanceTester
 
 
 class TemporalDifference(object):
@@ -26,7 +25,7 @@ class TemporalDifferenceZero(TemporalDifference, VController):
         raise NotImplementedError
 
 
-class SARSA(TemporalDifference, QController, PerformanceTester):
+class SARSA(TemporalDifference, QController):
 
     def __init__(self, policy, nb_states, nb_actions, env, nb_episodes=1000000, gamma=.99, alpha=.05):
         super().__init__(alpha)
@@ -41,18 +40,6 @@ class SARSA(TemporalDifference, QController, PerformanceTester):
                                                                                episode[index + 1][1]]
                                                                            - self.q[
                                                                                episode[index][0], episode[index][1]])
-
-    def test_performance(self):
-        sum_returns = 0
-        for i in range(self.nb_episodes):
-            state = self.env.reset()
-            done = False
-            while not done:
-                action = self.policy(state)
-                state, reward, done, info = self.env.step(action)
-                if done:
-                    sum_returns += reward
-        return sum_returns / self.nb_episodes
 
 
 class QLearning(TemporalDifference, QController):
