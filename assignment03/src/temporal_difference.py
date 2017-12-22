@@ -1,26 +1,19 @@
 import numpy as np
-from assignment03.src.reinforcement_learning import ReinforcementLearningAlgorithm
-from assignment03.src.evaluation import VEvaluator, QEvaluator
+from assignment03.src.control import VController, QController
+from assignment03.src.perfomance import PerformanceTester
 
 
-class TemporalDifference(ReinforcementLearningAlgorithm):
+class TemporalDifference(object):
 
-    def __init__(self, policy, epsilon, nb_states, nb_actions, env, nb_episodes, gamma, alpha):
-        super().__init__(policy, epsilon, nb_actions, env, nb_episodes, gamma)
-        super().__init__(nb_states)
+    def __init__(self, alpha):
         self.alpha = alpha
 
-    def evaluate(self, episode):
-        raise NotImplementedError
 
-    def improve(self, episode):
-        raise NotImplementedError
+class TemporalDifferenceZero(TemporalDifference, VController):
 
-
-class TemporalDifferenceZero(TemporalDifference, VEvaluator):
-
-    def __init__(self, policy, epsilon, nb_states, nb_actions, env, nb_episodes=1000000, gamma=.99, alpha=.05):
-        super().__init__(policy, epsilon, nb_states, nb_actions, env, nb_episodes, gamma, alpha)
+    def __init__(self, policy, nb_states, env, nb_episodes=1000000, gamma=.99, alpha=.05):
+        super().__init__(alpha)
+        super().__init__(policy, env, nb_states, nb_episodes, gamma)
 
     def evaluate(self, episode):
         for index in reversed(range(len(episode))):
@@ -33,10 +26,11 @@ class TemporalDifferenceZero(TemporalDifference, VEvaluator):
         raise NotImplementedError
 
 
-class SARSA(TemporalDifference, QEvaluator):
+class SARSA(TemporalDifference, QController, PerformanceTester):
 
-    def __init__(self, policy, epsilon, nb_states, nb_actions, env, nb_episodes=1000000, gamma=.99, alpha=.05):
-        super().__init__(policy, epsilon, nb_states, nb_actions, env, nb_episodes, gamma, alpha)
+    def __init__(self, policy, nb_states, nb_actions, env, nb_episodes=1000000, gamma=.99, alpha=.05):
+        super().__init__(alpha)
+        super().__init__(policy, env, nb_states, nb_actions, nb_episodes, gamma)
 
     def evaluate(self, episode):
         for index in reversed(range(len(episode))):
@@ -48,15 +42,24 @@ class SARSA(TemporalDifference, QEvaluator):
                                                                            - self.q[
                                                                                episode[index][0], episode[index][1]])
 
-    def improve(self, episode):
-        for state in set([step[0] for step in episode]):
-            self.policy.set(state, np.argmax(self.q[state, :], axis=1))
+    def test_performance(self):
+        sum_returns = 0
+        for i in range(self.nb_episodes):
+            state = self.env.reset()
+            done = False
+            while not done:
+                action = self.policy(state)
+                state, reward, done, info = self.env.step(action)
+                if done:
+                    sum_returns += reward
+        return sum_returns / self.nb_episodes
 
 
-class QLearning(TemporalDifference, QEvaluator):
+class QLearning(TemporalDifference, QController):
 
-    def __init__(self, policy, epsilon, nb_states, nb_actions, env, nb_episodes=1000000, gamma=.99, alpha=.05):
-        super().__init__(policy, epsilon, nb_states, nb_actions, env, nb_episodes, gamma, alpha)
+    def __init__(self, policy, nb_states, nb_actions, env, nb_episodes=1000000, gamma=.99, alpha=.05):
+        super().__init__(alpha)
+        super().__init__(policy, env, nb_states, nb_actions, nb_episodes, gamma)
 
     def evaluate(self, episode):
         for index in reversed(range(len(episode))):
@@ -67,7 +70,3 @@ class QLearning(TemporalDifference, QEvaluator):
                                                                                self.q[episode[index + 1][0], :], axis=1)
                                                                            - self.q[
                                                                                episode[index][0], episode[index][1]])
-
-    def improve(self, episode):
-        for state in set([step[0] for step in episode]):
-            self.policy.set(state, np.argmax(self.q[state, :], axis=1))
