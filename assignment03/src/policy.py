@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class Policy(object):
 
     def __init__(self, policy):
@@ -34,3 +33,9 @@ class EpsilonGreedyPolicy(Policy):
             return self.policy[state]
         else:
             return np.random.randint(len(self.nb_actions))
+
+
+class PolicyHandler(object):
+
+    def __init__(self, policy):
+        self.policy = policy

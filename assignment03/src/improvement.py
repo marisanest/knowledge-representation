@@ -1,32 +1,32 @@
 import numpy as np
-from assignment03.src.evaluation import VEvaluator, QEvaluator
+from assignment03.src.value_function import V, Q
+from assignment03.src.policy import PolicyHandler
 
 
-class Improver(object):
+class Improver(PolicyHandler):
 
-    def improve(self, episode):
-        raise NotImplementedError
-
-
-class VImprover(Improver, VEvaluator):
-
-    def __init__(self, policy, env, nb_states, nb_episodes, gamma):
-        super().__init__(policy, env, nb_states, nb_episodes, gamma)
-
-    def evaluate(self, episode):
-        raise NotImplementedError
+    def __init__(self, policy):
+        super().__init__(policy)
 
     def improve(self, episode):
         raise NotImplementedError
 
 
-class QImprover(Improver, QEvaluator):
+class VImprover(V, Improver):
 
-    def __init__(self, policy, env, nb_states, nb_actions, nb_episodes, gamma):
-        super().__init__(policy, env, nb_states, nb_actions, nb_episodes, gamma)
+    def __init__(self, nb_states, policy):
+        super().__init__(nb_states)
+        super().__init__(policy)
 
-    def evaluate(self, episode):
+    def improve(self, episode):
         raise NotImplementedError
+
+
+class QImprover(Q, Improver):
+
+    def __init__(self, nb_states, nb_actions, policy):
+        super().__init__(nb_states, nb_actions)
+        super().__init__(policy)
 
     def improve(self, episode):
         for state in set([step[0] for step in episode]):

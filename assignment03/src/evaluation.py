@@ -1,12 +1,14 @@
-import numpy as np
 from assignment03.src.generation import EpisodeGenerator
 from assignment03.src.perfomance import PerformanceTester
+from assignment03.src.policy import PolicyHandler
+from assignment03.src.value_function import V, Q
 
 
-class Evaluator(EpisodeGenerator, PerformanceTester):
+class Evaluator(EpisodeGenerator, PerformanceTester, PolicyHandler):
 
     def __init__(self, policy, env, nb_episodes, gamma):
         super().__init__(policy, env)
+        super().__init__(policy)
         self.nb_episodes = nb_episodes
         self.gamma = gamma
 
@@ -31,21 +33,21 @@ class Evaluator(EpisodeGenerator, PerformanceTester):
         return sum_returns / self.nb_episodes
 
 
-class VEvaluator(Evaluator):
+class VEvaluator(V, Evaluator):
 
     def __init__(self, policy, env, nb_states, nb_episodes, gamma):
+        super().__init__(nb_states)
         super().__init__(policy, env, nb_episodes, gamma)
-        self.v = np.zeros(nb_states)
 
     def evaluate(self, episode):
         raise NotImplementedError
 
 
-class QEvaluator(Evaluator):
+class QEvaluator(Q, Evaluator):
 
     def __init__(self, policy, env, nb_states, nb_actions, nb_episodes, gamma):
         super().__init__(policy, env, nb_episodes, gamma)
-        self.q = np.zeros(nb_states, nb_actions)
+        super().__init__(nb_states, nb_actions)
 
     def evaluate(self, episode):
         raise NotImplementedError
