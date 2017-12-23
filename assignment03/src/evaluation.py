@@ -7,13 +7,13 @@ from assignment03.src.value_function import V, Q
 class Evaluator(EpisodeGenerator, PerformanceTester, PolicyHandler):
 
     def __init__(self, policy, env, nb_episodes, gamma):
-        super().__init__(policy, env)
-        super().__init__(policy)
+        EpisodeGenerator.__init__(self, policy, env)
+        PolicyHandler.__init__(self, policy)
         self.nb_episodes = nb_episodes
         self.gamma = gamma
 
-    def evaluate_n_episodes(self, nb_episodes):
-        for _ in range(nb_episodes):
+    def evaluate_n_episodes(self):
+        for _ in range(self.nb_episodes):
             episode = self.generate_episode()
             self.evaluate(episode)
 
@@ -36,8 +36,8 @@ class Evaluator(EpisodeGenerator, PerformanceTester, PolicyHandler):
 class VEvaluator(V, Evaluator):
 
     def __init__(self, policy, env, nb_states, nb_episodes, gamma):
-        super().__init__(nb_states)
-        super().__init__(policy, env, nb_episodes, gamma)
+        V.__init__(self, nb_states)
+        Evaluator.__init__(self, policy, env, nb_episodes, gamma)
 
     def evaluate(self, episode):
         raise NotImplementedError
@@ -46,8 +46,8 @@ class VEvaluator(V, Evaluator):
 class QEvaluator(Q, Evaluator):
 
     def __init__(self, policy, env, nb_states, nb_actions, nb_episodes, gamma):
-        super().__init__(policy, env, nb_episodes, gamma)
-        super().__init__(nb_states, nb_actions)
+        Q.__init__(self, nb_states, nb_actions)
+        Evaluator.__init__(self, policy, env, nb_episodes, gamma)
 
     def evaluate(self, episode):
         raise NotImplementedError

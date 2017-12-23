@@ -11,11 +11,12 @@ class TemporalDifference(object):
 class TemporalDifferenceZero(TemporalDifference, VController):
 
     def __init__(self, policy, nb_states, env, nb_episodes=1000000, gamma=.99, alpha=.05):
-        super().__init__(alpha)
-        super().__init__(policy, env, nb_states, nb_episodes, gamma)
+        TemporalDifference.__init__(self, alpha)
+        VController.__init__(self, policy, env, nb_states, nb_episodes, gamma)
 
     def evaluate(self, episode):
         for index in reversed(range(len(episode))):
+
             self.v[episode[index][0]] = self.v[episode[index][0]] + self.alpha * (episode[index][2]
                                                                                   + self.gamma * self.v[
                                                                                       episode[index + 1][0]]
@@ -28,8 +29,8 @@ class TemporalDifferenceZero(TemporalDifference, VController):
 class SARSA(TemporalDifference, QController):
 
     def __init__(self, policy, nb_states, nb_actions, env, nb_episodes=1000000, gamma=.99, alpha=.05):
-        super().__init__(alpha)
-        super().__init__(policy, env, nb_states, nb_actions, nb_episodes, gamma)
+        TemporalDifference.__init__(self, alpha)
+        QController.__init__(self, policy, env, nb_states, nb_actions, nb_episodes, gamma)
 
     def evaluate(self, episode):
         for index in reversed(range(len(episode))):
@@ -45,8 +46,8 @@ class SARSA(TemporalDifference, QController):
 class QLearning(TemporalDifference, QController):
 
     def __init__(self, policy, nb_states, nb_actions, env, nb_episodes=1000000, gamma=.99, alpha=.05):
-        super().__init__(alpha)
-        super().__init__(policy, env, nb_states, nb_actions, nb_episodes, gamma)
+        TemporalDifference.__init__(self, alpha)
+        QController.__init__(self, policy, env, nb_states, nb_actions, nb_episodes, gamma)
 
     def evaluate(self, episode):
         for index in reversed(range(len(episode))):

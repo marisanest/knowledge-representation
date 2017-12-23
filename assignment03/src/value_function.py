@@ -8,5 +8,6 @@ class V(object):
 
 
 class Q(object):
+
     def __init__(self, nb_states, nb_actions):
-        self.q = np.zeros(nb_states, nb_actions)
+        self.q = np.zeros((nb_states, nb_actions))

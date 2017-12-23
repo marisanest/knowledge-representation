@@ -6,15 +6,12 @@ class EpisodeGenerator(object):
 
     def generate_episode(self):
 
-        state = self.env.reset()
-        action = self.policy(state)
-        state_prime, reward, done, info = self.env.step(action)
-        episode = [(state, action, reward)]
+        state, reward, done, action, episode = self.env.reset(), None, False, None, []
 
         while not done:
-            state = state_prime,
             action = self.policy(state)
             state_prime, reward, done, info = self.env.step(action)
             episode.append((state, action, reward))
+            state = state_prime
 
         return episode

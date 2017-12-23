@@ -15,8 +15,8 @@ class Improver(PolicyHandler):
 class VImprover(V, Improver):
 
     def __init__(self, nb_states, policy):
-        super().__init__(nb_states)
-        super().__init__(policy)
+        V.__init__(self, nb_states)
+        Improver.__init__(self, policy)
 
     def improve(self, episode):
         raise NotImplementedError
@@ -25,8 +25,8 @@ class VImprover(V, Improver):
 class QImprover(Q, Improver):
 
     def __init__(self, nb_states, nb_actions, policy):
-        super().__init__(nb_states, nb_actions)
-        super().__init__(policy)
+        Q.__init__(self, nb_states, nb_actions)
+        Improver.__init__(self, policy)
 
     def improve(self, episode):
         for state in set([step[0] for step in episode]):

@@ -5,8 +5,8 @@ from assignment03.src.evaluation import VEvaluator, QEvaluator, Evaluator
 class Controller(Evaluator, Improver):
 
     def __init__(self, policy, env, nb_episodes, gamma):
-        super().__init__(policy, env, nb_episodes, gamma)
-        super().__init__(policy)
+        Evaluator.__init__(self, policy, env, nb_episodes, gamma)
+        Improver.__init__(self, policy)
 
     def control(self):
         for _ in range(self.nb_episodes):
@@ -24,9 +24,9 @@ class Controller(Evaluator, Improver):
 class VController(Controller, VEvaluator, VImprover):
 
     def __init__(self, policy, env, nb_states, nb_episodes, gamma):
-        super().__init__(policy, env, nb_episodes, gamma)
-        super().__init__(policy, env, nb_states, nb_episodes, gamma)
-        super().__init__(nb_states, policy)
+        Controller.__init__(self, policy, env, nb_episodes, gamma)
+        VEvaluator.__init__(self, policy, env, nb_states, nb_episodes, gamma)
+        VImprover.__init__(self, nb_states, policy)
 
     def improve(self, episode):
         raise NotImplementedError
@@ -38,9 +38,9 @@ class VController(Controller, VEvaluator, VImprover):
 class QController(Controller, QEvaluator, QImprover):
 
     def __init__(self, policy, env, nb_states, nb_actions, nb_episodes, gamma):
-        super().__init__(policy, env, nb_episodes, gamma)
-        super().__init__(policy, env, nb_states, nb_actions, nb_episodes, gamma)
-        super().__init__(nb_states, nb_actions, policy)
+        Controller.__init__(self, policy, env, nb_episodes, gamma)
+        QEvaluator.__init__(self, policy, env, nb_states, nb_actions, nb_episodes, gamma)
+        QImprover.__init__(self, nb_states, nb_actions, policy)
 
     def evaluate(self, episode):
         raise NotImplementedError
