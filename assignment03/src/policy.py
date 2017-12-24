@@ -31,12 +31,7 @@ class EpsilonGreedyPolicy(Policy):
 
     def __call__(self, state, *args, **kwargs):
         if np.random.randint(100) < self.epsilon:
-            return self.policy[state]
-        else:
             return np.random.randint(self.nb_actions)
+        else:
+            return self.policy[state]
 
-
-class PolicyHandler(object):
-
-    def __init__(self, policy):
-        self.policy = policy
