@@ -15,6 +15,8 @@ See [the lecture](https://moodle.htw-berlin.de/course/view.php?id=14471)
 - Jupyter notebook
 - numpy
 - gym
+- scipy
+- matplotlib
 
 ## Literatur
 
