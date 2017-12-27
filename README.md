@@ -1,6 +1,6 @@
 # knowledge-representation
 
-This is a project for the lecture "Wissensrepräsentation".
+This is a project for the lecture "Wissensrepräsentation". The lecture is about reinforcement learning and follows the Sutton and Barto book [Reinforcement Learning: An Introduction](http://incompleteideas.net/book/bookdraft2017nov5.pdf).
 
 ## Assignments
 
