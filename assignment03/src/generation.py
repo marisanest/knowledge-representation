@@ -10,7 +10,7 @@ class EpisodeGenerator(object):
 
         while not done:
             action = self.policy(state)
-            state_prime, reward, done, info = self.env.step(action)
+            state_prime, reward, done, _ = self.env.step(action)
             episode.append((state, action, reward))
             state = state_prime
 
